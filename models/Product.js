@@ -9,10 +9,12 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    category: [{
-        type: String,
-        enum: ['veg', 'non-veg']
-    }],
+    category: {
+        type: [{
+            type: String,
+            enum: ['veg', 'non-veg']
+        }]
+    },
     image: {
         type: String
     },
@@ -28,7 +30,6 @@ const productSchema = new mongoose.Schema({
     }]
 });
 
-// ✅ Check if the model exists before defining it to prevent OverwriteModelError
-const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
+const Product = mongoose.model('Product', productSchema);
 
-module.exports = Product;
+module.exports = Product
