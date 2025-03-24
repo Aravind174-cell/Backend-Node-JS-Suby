@@ -65,16 +65,14 @@ const addProduct = async (req, res) => {
 const getProductByFirm = async (req, res) => {
     try {
         const firmId = req.params.firmId;
-        const firm = await Firm.findById(firmId);
+        const firm = await Firm.findById(firmId).populate("products");
 
         if (!firm) {
             return res.status(404).json({ success: false, message: "Firm not found" });
         }
 
         const restaurantName = firm.firmName;
-        const products = await Product.find({ firm: firmId });
-
-        res.status(200).json({ success: true, restaurantName, products });
+        res.status(200).json({ success: true, restaurantName, products: firm.products });
     } catch (error) {
         console.error("Error fetching products:", error);
         res.status(500).json({ success: false, message: "Internal server error" });

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const firmSchema = new mongoose.Schema({
     firmName: {
@@ -11,12 +11,10 @@ const firmSchema = new mongoose.Schema({
         required: true
     },
     category: [{
-        type: String,
-        enum: ['veg', 'non-veg']
+        type: String // ✅ Removed enum to allow flexibility
     }],
     region: [{
-        type: String,
-        enum: ['south-indian', 'north-indian', 'chinese', 'bakery']
+        type: String // ✅ Removed enum for flexibility
     }],
     offer: {
         type: String
@@ -24,15 +22,15 @@ const firmSchema = new mongoose.Schema({
     image: {
         type: String
     },
-    vendor: [{
+    vendor: { // ✅ FIXED: Vendor should be a single ObjectId
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Vendor'
-    }],
-    product: [{
+        ref: "Vendor"
+    },
+    products: [{ // ✅ FIXED: Renamed from 'product' to 'products'
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product' // ✅ No need to import Product here
+        ref: "Product"
     }]
 });
 
-const Firm = mongoose.model('Firm', firmSchema);
+const Firm = mongoose.model("Firm", firmSchema);
 module.exports = Firm;
