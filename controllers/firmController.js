@@ -1,35 +1,39 @@
-const Firm = require('../models/Firm');
-const Vendor = require('../models/Vendor');
-const multer = require('multer');
-const path = require('path');
+const Firm = require("../models/Firm");
+const Vendor = require("../models/Vendor");
+const multer = require("multer");
+const path = require("path");
 
-
+// Multer Storage Configuration
 const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, 'uploads/'); // Destination folder where the uploaded images will be stored
+    destination: (req, file, cb) => {
+        cb(null, "uploads/"); // Destination folder for image uploads
     },
-    filename: function(req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)); // Generating a unique filename
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
     }
 });
 
 const upload = multer({ storage: storage });
 
-const addFirm = async(req, res) => {
+// 🟢 Add Firm Function
+const addFirm = async (req, res) => {
     try {
         const { firmName, area, category, region, offer } = req.body;
-
         const image = req.file ? req.file.filename : undefined;
+        const vendorId = req.params.vendorId; // Ensure vendorId is passed from frontend
 
-        const vendor = await Vendor.findById(req.vendorId);
+        // ✅ Check if vendor exists
+        const vendor = await Vendor.findById(vendorId);
         if (!vendor) {
-            res.status(404).json({ message: "Vendor not found" })
+            return res.status(404).json({ success: false, message: "Vendor not found" });
         }
 
-        if (vendor.firm.length > 0) {
-            return res.status(400).json({ message: "vendor can have only one firm" });
+        // ✅ Vendor can have only one firm
+        if (vendor.firm) {
+            return res.status(400).json({ success: false, message: "Vendor can have only one firm" });
         }
 
+        // ✅ Create new firm
         const firm = new Firm({
             firmName,
             area,
@@ -38,41 +42,55 @@ const addFirm = async(req, res) => {
             offer,
             image,
             vendor: vendor._id
-        })
+        });
 
+        // ✅ Save firm to DB
         const savedFirm = await firm.save();
 
-        const firmId = savedFirm._id
-        const vendorFirmName = savedFirm.firmName
+        // ✅ Associate the firm with the vendor
+        vendor.firm = savedFirm._id;
+        await vendor.save();
 
-        vendor.firm.push(savedFirm)
-
-        await vendor.save()
-
-
-
-        return res.status(200).json({ message: 'Firm Added successfully ', firmId, vendorFirmName });
-
+        res.status(201).json({
+            success: true,
+            message: "Firm added successfully",
+            firmId: savedFirm._id,
+            vendorFirmName: savedFirm.firmName
+        });
 
     } catch (error) {
-        console.error(error)
-        res.status(500).json("intenal server error")
+        console.error("Error adding firm:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
-}
+};
 
-const deleteFirmById = async(req, res) => {
+// 🟢 Delete Firm By ID
+const deleteFirmById = async (req, res) => {
     try {
         const firmId = req.params.firmId;
 
-        const deletedProduct = await Firm.findByIdAndDelete(firmId);
-
-        if (!deletedProduct) {
-            return res.status(404).json({ error: "No product found" })
+        // ✅ Find the firm before deleting
+        const firm = await Firm.findById(firmId);
+        if (!firm) {
+            return res.status(404).json({ success: false, message: "Firm not found" });
         }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal server error" })
-    }
-}
 
-module.exports = { addFirm: [upload.single('image'), addFirm], deleteFirmById }
+        // ✅ Remove firm reference from Vendor
+        await Vendor.updateOne({ firm: firmId }, { $unset: { firm: "" } });
+
+        // ✅ Delete the firm
+        await Firm.findByIdAndDelete(firmId);
+
+        res.status(200).json({ success: true, message: "Firm deleted successfully" });
+
+    } catch (error) {
+        console.error("Error deleting firm:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
+
+// Exporting functions with multer middleware
+module.exports = {
+    addFirm: [upload.single("image"), addFirm],
+    deleteFirmById
+};
