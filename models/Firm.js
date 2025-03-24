@@ -11,10 +11,12 @@ const firmSchema = new mongoose.Schema({
         required: true
     },
     category: [{
-        type: String // ✅ Removed enum to allow flexibility
+        type: String,
+        enum: ["veg", "non-veg"]
     }],
     region: [{
-        type: String // ✅ Removed enum for flexibility
+        type: String,
+        enum: ["south-indian", "north-indian", "chinese", "bakery"]
     }],
     offer: {
         type: String
@@ -22,11 +24,12 @@ const firmSchema = new mongoose.Schema({
     image: {
         type: String
     },
-    vendor: { // ✅ FIXED: Vendor should be a single ObjectId
+    vendor: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Vendor"
-    },
-    products: [{ // ✅ FIXED: Renamed from 'product' to 'products'
+    }],
+    // ✅ Corrected field name: "products" instead of "product"
+    products: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product"
     }]
