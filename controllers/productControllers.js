@@ -64,17 +64,27 @@ const addProduct = async (req, res) => {
 // 🟢 Get Products by Firm
 const getProductByFirm = async (req, res) => {
     try {
-        const firmId = req.params.firmId;
-        const firm = await Firm.findById(firmId).populate("products");
+        const { firmId } = req.params;
 
-        if (!firm) {
-            return res.status(404).json({ success: false, message: "Firm not found" });
+        // ✅ Check if firmId exists
+        if (!firmId || firmId === "null") {
+            return res.status(400).json({ success: false, message: "Invalid firmId" });
         }
 
-        const restaurantName = firm.firmName;
-        res.status(200).json({ success: true, restaurantName, products: firm.products });
+        // ✅ Ensure firmId is a valid ObjectId before using it in Mongoose
+        if (!mongoose.Types.ObjectId.isValid(firmId)) {
+            return res.status(400).json({ success: false, message: "Invalid firmId format" });
+        }
+
+        const products = await Product.find({ firmId });
+
+        if (!products.length) {
+            return res.status(404).json({ success: false, message: "No products found" });
+        }
+
+        res.json({ success: true, products });
     } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Server error:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
