@@ -10,7 +10,8 @@ router.post('/login', vendorController.vendorLogin);
 // Fetch Vendors
 router.get('/all-vendors', vendorController.getAllVendors);
 
-// 🔥 FIX: Use ':vendorId' instead of ':apple'
+// 🔥 FIX: Use ':vendorId' instead of ':apple' recent changes
+
 router.get('/single-vendor/:vendorId', vendorController.getVendorById);
 
 module.exports = router;
