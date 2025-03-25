@@ -61,7 +61,7 @@ const addProduct = async (req, res) => {
     }
 };
 
-// 🟢 Get Products by Firm
+// 🟢 Get Products by Firm  rechange
 const getProductByFirm = async (req, res) => {
     try {
         const { firmId } = req.params;
