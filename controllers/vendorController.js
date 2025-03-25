@@ -1,21 +1,20 @@
-
-
 const Vendor = require('../models/Vendor');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const dotEnv = require('dotenv');
 
-
 dotEnv.config();
 
 const secretKey = process.env.WhatIsYourName
 
-const vendorRegister = async(req, res)=>{
-    const {username, email, password} = req.body;
-    try{
-        const vendorEmail = await Vendor.findOne({email});
+
+
+const vendorRegister = async(req, res) => {
+    const { username, email, password } = req.body;
+    try {
+        const vendorEmail = await Vendor.findOne({ email });
         if (vendorEmail) {
-            return res.status(400).json("Email already taken");a
+            return res.status(400).json("Email already taken");
         }
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -26,13 +25,14 @@ const vendorRegister = async(req, res)=>{
         });
         await newVendor.save();
 
-        res.status(201).json({message: "Vendor registered successfully"});
+        res.status(201).json({ message: "Vendor registered successfully" });
         console.log('registered')
-    } 
-    catch(error) {
+
+    } catch (error) {
         console.error(error);
-        res.status(500).json({error: "Internal server error"})
+        res.status(500).json({ error: "Internal server error" })
     }
+
 }
 
 const vendorLogin = async(req, res) => {
@@ -55,7 +55,6 @@ const vendorLogin = async(req, res) => {
 
 }
 
-
 const getAllVendors = async(req, res) => {
     try {
         const vendors = await Vendor.find().populate('firm');
@@ -66,36 +65,23 @@ const getAllVendors = async(req, res) => {
     }
 }
 
-const getVendorById = async (req, res) => {
+
+const getVendorById = async(req, res) => {
+    const vendorId = req.params.apple;
+
     try {
-        // Ensure you're using the correct parameter from the route
-        const vendorId = req.params.id;  // ✅ Make sure your route uses ":id"
-
-        if (!vendorId) {
-            return res.status(400).json({ error: "Vendor ID is required" });
-        }
-
-        // Find vendor and populate "firm"
         const vendor = await Vendor.findById(vendorId).populate('firm');
-
         if (!vendor) {
-            return res.status(404).json({ error: "Vendor not found" });
+            return res.status(404).json({ error: "Vendor not found" })
         }
-
-        // Check if "firm" exists and has elements before accessing _id
-        let vendorFirmId = null;
-        if (vendor.firm && vendor.firm.length > 0) {
-            vendorFirmId = vendor.firm[0]._id;
-        }
-
-        // Return response with vendor details
-        res.status(200).json({ vendorId, vendorFirmId, vendor });
-        console.log("Vendor Firm ID:", vendorFirmId);
+        const vendorFirmId = vendor.firm[0]._id;
+        res.status(200).json({ vendorId, vendorFirmId, vendor })
+        console.log(vendorFirmId);
     } catch (error) {
-        console.error("Error fetching vendor:", error);
+        console.log(error);
         res.status(500).json({ error: "Internal server error" });
     }
-};
+}
 
 
-module.exports = {vendorRegister, vendorLogin, getAllVendors, getVendorById}
+module.exports = { vendorRegister, vendorLogin, getAllVendors, getVendorById }

@@ -1,4 +1,3 @@
-
 const express = require('express');
 const firmController = require('../controllers/firmController');
 const verifyToken = require('../middlewares/verifyToken');
@@ -18,4 +17,3 @@ router.delete('/:firmId', firmController.deleteFirmById);
 
 
 module.exports = router;
-
