@@ -3,11 +3,14 @@ const vendorController = require("../controllers/vendorController");
 
 const router = express.Router();
 
-// Correctly using vendorRegister function
+// Vendor Registration & Login
 router.post('/register', vendorController.vendorRegister);
 router.post('/login', vendorController.vendorLogin);
 
+// Fetch Vendors
 router.get('/all-vendors', vendorController.getAllVendors);
-router.get('/single-vendor/:apple', vendorController.getVendorById)
+
+// 🔥 FIX: Use ':vendorId' instead of ':apple'
+router.get('/single-vendor/:vendorId', vendorController.getVendorById);
 
 module.exports = router;
